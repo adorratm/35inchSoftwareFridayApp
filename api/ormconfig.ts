@@ -2,11 +2,12 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export const ormconfig = {
-  type: 'mysql',
-  host: process.env.MYSQL_HOST,
-  username: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
+  type: 'mssql',
+  host: process.env.MSSQL_HOST,
+  username: process.env.MSSQL_USER,
+  password: process.env.MSSQL_PASSWORD,
+  database: process.env.MSSQL_DATABASE,
+  port: parseInt(process.env.DB_PORT, 10),
   "extra": {
     // "ssl": "true",
     trustServerCertificate: true,

@@ -1,6 +1,6 @@
 FROM node:lts-bullseye-slim as builder
 
-WORKDIR /app
+WORKDIR /wallet-app
 
 COPY package*.json ./
 COPY yarn.lock ./
@@ -11,7 +11,7 @@ RUN yarn build
 
 FROM node:lts-bullseye-slim
 
-WORKDIR /app
+WORKDIR /wallet-app
 
 COPY package*.json ./
 COPY yarn.lock ./
@@ -21,9 +21,9 @@ RUN yarn
 RUN yarn add sharp --ignore-engines
 
 # assets klasörünü de kopyala
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /wallet-app/dist ./dist
 # Public klasörünü de kopyala
-COPY --from=builder /app/dist/public ./dist/public
+COPY --from=builder /wallet-app/dist/public ./dist/public
 
 EXPOSE 3000
 
