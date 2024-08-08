@@ -1,45 +1,40 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Injectable, Inject } from '@nestjs/common';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { EntityManager } from 'typeorm';
 import { Wallet } from 'src/entities/wallet.entity';
-import { Transaction } from 'src/entities/transaction.entity';
-import { CreateTransactionDto } from 'src/dtos/create_transaction.dtos';
+import Redis from 'ioredis';
+import Redlock from 'redlock';
 
 @Injectable()
 export class WalletService {
   constructor(
-    @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
-    @InjectRepository(Transaction) private transactionRepository: Repository<Transaction>,
-    private dataSource: DataSource,
+    @InjectEntityManager() private readonly entityManager: EntityManager,
+    @Inject('REDLOCK') private readonly redlock: Redlock,
   ) {}
 
-  async transferFunds(createTransactionDto: CreateTransactionDto): Promise<void> {
-    const { senderWalletId, receiverWalletId, amount } = createTransactionDto;
-
-    return this.dataSource.transaction(async (manager) => {
-      const senderWallet = await manager.getRepository(Wallet).findOne({
-        where: { id: senderWalletId },
-        lock: { mode: 'pessimistic_write' },
-      });
-
-      if (!senderWallet || senderWallet.balance < amount) {
-        throw new Error('Insufficient balance');
-      }
-
-      senderWallet.balance -= amount;
-      await manager.save(senderWallet);
-
-      const receiverWallet = await manager.getRepository(Wallet).findOne({ where: { id: receiverWalletId } });
-      receiverWallet.balance += amount;
-      await manager.save(receiverWallet);
-
-      const transaction = new Transaction();
-      transaction.sender = senderWallet;
-      transaction.receiver = receiverWallet;
-      transaction.amount = amount;
-      await manager.save(transaction);
-
-      // Burada blockchain veya başka bir sistemle entegrasyon işlemi yapılabilir.
+  async createWallet(initialBalance: number): Promise<Wallet> {
+    return this.entityManager.transaction(async (manager) => {
+      const wallet = manager.create(Wallet, { balance: initialBalance });
+      return await manager.save(wallet);
     });
+  }
+
+  async updateBalance(walletId: number, amount: number): Promise<Wallet> {
+    // Redlock kullanarak distributed lock ile concurrency ve consistency sağlama
+    const lock = await this.redlock.acquire([`wallet:${walletId}`], 1000); // 1 saniye lock süresi
+
+    try {
+      return await this.entityManager.transaction(async (manager) => {
+        const wallet = await manager.findOne(Wallet, { where: { id: walletId } });
+        if (!wallet) {
+          throw new Error('Wallet not found');
+        }
+        wallet.balance += amount;
+        return await manager.save(wallet);
+      });
+    } finally {
+      // Lock serbest bırakma
+      await lock.release().catch((err) => console.error(err));
+    }
   }
 }

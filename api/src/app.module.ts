@@ -18,49 +18,52 @@ import { AllExceptionsFilter } from 'src/common/all-exceptions.filter';
 import { RequestHandlerMiddleware } from 'src/common/request-handler-middleware.service';
 
 @Module({
-  imports: [WinstonModule.forRoot({
-    transports: [
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.printf(({ timestamp, level, message }) => {
-            return `${timestamp} ${level}: ${message}`;
-          }),
-        ),
-      }),
-    ],
-  }),
-  ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'public'),
-    renderPath: '/public',
-    serveRoot: '/public',
-  }),
-  ConfigModule.forRoot({
-    isGlobal: true,
-  }),
-  TypeOrmModule.forRootAsync({
-    useFactory: () => ormconfig as TypeOrmModuleOptions,
-  }),
-  CacheModule.register({ isGlobal: true }),
-  ThrottlerModule.forRoot({
-    throttlers: [
-      {
-        name: 'short',
-        ttl: 1000,
-        limit: 20,
-      },
-      {
-        name: 'medium',
-        ttl: 10000,
-        limit: 20
-      },
-      {
-        name: 'long',
-        ttl: 60000,
-        limit: 100
-      }
-    ]
-  }),
+  imports: [
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.printf(({ timestamp, level, message }) => {
+              return `${timestamp} ${level}: ${message}`;
+            }),
+          ),
+        }),
+      ],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      renderPath: '/public',
+      serveRoot: '/public',
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ormconfig as TypeOrmModuleOptions,
+    }),
+    CacheModule.register({ isGlobal: true }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'short',
+          ttl: 1000,
+          limit: 20,
+        },
+        {
+          name: 'medium',
+          ttl: 10000,
+          limit: 20
+        },
+        {
+          name: 'long',
+          ttl: 60000,
+          limit: 100
+        }
+      ]
+    }),
+    // Wallet Module
+    WalletModule
   ],
   controllers: [AppController],
   providers: [JwtService, AppService, CacheManager, {

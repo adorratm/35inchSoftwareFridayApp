@@ -2,23 +2,12 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export const ormconfig = {
-  type: 'mssql',
-  host: process.env.MSSQL_HOST,
-  username: process.env.MSSQL_USER,
-  password: process.env.MSSQL_PASSWORD,
-  database: process.env.MSSQL_DATABASE,
-  port: parseInt(process.env.DB_PORT, 10),
-  "extra": {
-    // "ssl": "true",
-    trustServerCertificate: true,
-  },
-  // ssl: {
-  //   rejectUnauthorized: false
-  // },
+  type: 'postgres',
+  host: process.env.POSTGRES_HOST,
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DATABASE,
+  port: parseInt(process.env.POSTGRES_PORT, 10),
   autoLoadEntities: true,
-  synchronize: false,
-  migrations: ['src/migration/*.js'],
-  cli: {
-    migrationsDir: 'src/migration',
-  },
+  synchronize: true, // set to true in dev
 };

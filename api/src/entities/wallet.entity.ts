@@ -1,17 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Transaction } from 'src/entities/transaction.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Wallet {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'decimal', precision: 18, scale: 8, default: 0 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   balance: number;
 
-  @OneToMany(() => Transaction, (transaction) => transaction.sender)
-  sentTransactions: Transaction[];
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @OneToMany(() => Transaction, (transaction) => transaction.receiver)
-  receivedTransactions: Transaction[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
