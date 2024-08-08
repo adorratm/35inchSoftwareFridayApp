@@ -1,24 +1,37 @@
 version: '3.8'
+
 services:
-  wallet-app:
-    build: .
+  postgres:
+    image: postgres:13
+    container_name: postgres
     ports:
-      - '3000:3000'
-    environment:
-      DATABASE_URL: postgres://postgres:wallet@db:5432/wallet
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      - db
-      - redis
-  db:
-    image: postgres
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: wallet
       POSTGRES_DB: wallet
-    ports:
-      - '5432:5432'
+
   redis:
-    image: redis
+    image: redis:6
+    container_name: redis
     ports:
-      - '6379:6379'
+      - "6379:6379"
+
+  wallet-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wallet-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: wallet
+      DATABASE_NAME: wallet
+      REDIS_HOST: redis
+      REDIS_PORT: 6379

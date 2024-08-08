@@ -9,5 +9,6 @@ export const ormconfig = {
   database: process.env.POSTGRES_DATABASE,
   port: parseInt(process.env.POSTGRES_PORT, 10),
   autoLoadEntities: true,
-  synchronize: true, // set to true in dev
+  synchronize: true,
+  entities: ["src/**/*.entity.ts"], // set to true in dev
 };
