@@ -23,7 +23,7 @@ services:
       dockerfile: Dockerfile
     container_name: wallet-app
     ports:
-      - "3000:3000"
+      - "5000:5000"
     depends_on:
       - postgres
       - redis

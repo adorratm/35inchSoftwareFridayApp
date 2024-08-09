@@ -25,6 +25,6 @@ COPY --from=builder /wallet-app/dist ./dist
 # Public klasörünü de kopyala
 COPY --from=builder /wallet-app/dist/public ./dist/public
 
-EXPOSE 3000
+EXPOSE 5000
 
 CMD yarn start:prod

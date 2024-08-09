@@ -23,12 +23,12 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
+      'http://localhost:5000',
+      'http://localhost:5001',
     ],
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
   });
-  await app.listen(3000);
+  await app.listen(5000);
 }
 bootstrap();
