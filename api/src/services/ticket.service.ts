@@ -13,7 +13,7 @@ export class TicketService {
     constructor(
         @InjectEntityManager() public entityManager: EntityManager,
         @Inject('REDLOCK') private readonly redlock: Redlock,
-    ) { }
+      ) {}
 
     async purchaseTicket(ticketId: number, quantity: number): Promise<Ticket> {
         const resource = `lock:ticket:${ticketId}`;
@@ -22,22 +22,18 @@ export class TicketService {
         const lock = await this.redlock.acquire([resource], ttl);
 
         try {
-            return await this.entityManager.transaction(async (transactionalEntityManager) => {
-                const ticket = await transactionalEntityManager.findOne(Ticket, { where: { id: ticketId } });
+            const ticket = await this.entityManager.findOne(Ticket, { where: { id: ticketId } });
 
-                // Burada farklı tablolara kayıt edilen veya güncellenen verilere ait işlemler de bulunabilirdi.
+            if (!ticket) {
+                throw new ConflictException('Bilet Bulunamadı.');
+            }
 
-                if (!ticket) {
-                    throw new ConflictException('Bilet Bulunamadı.');
-                }
+            if (ticket.quantity < quantity) {
+                throw new ConflictException('Yeteri kadar satılacak bilet kalmadı.');
+            }
 
-                if (ticket.quantity < quantity) {
-                    throw new ConflictException('Yeteri kadar satılacak bilet kalmadı.');
-                }
-
-                ticket.quantity -= quantity;
-                return await transactionalEntityManager.save(ticket);
-            })
+            ticket.quantity -= quantity;
+            return await this.entityManager.save(ticket);
         } finally {
             await lock.release().catch((err) => console.error(err));
         }

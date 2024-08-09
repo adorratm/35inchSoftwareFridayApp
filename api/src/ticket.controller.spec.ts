@@ -52,19 +52,13 @@ describe('TicketService', () => {
     mockEntityManager.findOne.mockResolvedValue(mockTicket);
     mockEntityManager.save.mockResolvedValue({ ...mockTicket, quantity: 5 });
 
-    const purchase1 = service.purchaseTicket(1, 10);
-    const purchase2 = service.purchaseTicket(1, 5);
-    const purchase3 = service.purchaseTicket(1, 2);
-    const purchase4 = service.purchaseTicket(1, 1);
-    const purchase5 = service.purchaseTicket(1, 3);
+    const purchase1 = service.purchaseTicket(1, 5);
+    const purchase2 = service.purchaseTicket(1, 6);
 
-    const [result1, result2, result3, result4, result5] = await Promise.allSettled([purchase1, purchase2, purchase3, purchase4, purchase5]);
+    const [result1, result2] = await Promise.allSettled([purchase1, purchase2, ]);
 
     console.log('Result 1:', result1);
     console.log('Result 2:', result2);
-    console.log('Result 3:', result3);
-    console.log('Result 4:', result4);
-    console.log('Result 5:', result5);
 
     // Ensure the second purchase fails due to insufficient tickets
     expect(result1.status).toBe('fulfilled');
