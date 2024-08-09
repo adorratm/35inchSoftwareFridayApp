@@ -1,37 +1,67 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:13
-    container_name: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: wallet
-      POSTGRES_DB: wallet
-
   redis:
     image: redis:6
     container_name: redis
     ports:
       - "6379:6379"
 
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=wallet
+    container_name: postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   wallet-app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: wallet-app
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=wallet
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=5000
     ports:
       - "5000:5000"
     depends_on:
-      - postgres
       - redis
+      - db
+    volumes:
+      - ./src:/app/src
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin
     environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: wallet
-      DATABASE_NAME: wallet
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -20,6 +20,9 @@ COPY .env ./
 RUN yarn
 RUN yarn add sharp --ignore-engines
 
+# wait-for-it scriptini kopyala
+COPY wait-for-it.sh /wallet-app/wait-for-it.sh
+
 # assets klasörünü de kopyala
 COPY --from=builder /wallet-app/dist ./dist
 # Public klasörünü de kopyala
@@ -27,4 +30,4 @@ COPY --from=builder /wallet-app/dist/public ./dist/public
 
 EXPOSE 5000
 
-CMD yarn start:prod
+CMD ["./wait-for-it.sh", "db:5432", "--", "yarn", "start:prod"]
