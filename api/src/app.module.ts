@@ -16,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { AllExceptionsFilter } from 'src/common/all-exceptions.filter';
 import { RequestHandlerMiddleware } from 'src/common/request-handler-middleware.service';
+import { TicketModule } from './modules/ticket.module';
 
 @Module({
   imports: [
@@ -63,7 +64,8 @@ import { RequestHandlerMiddleware } from 'src/common/request-handler-middleware.
       ]
     }),
     // Wallet Module
-    WalletModule
+    WalletModule,
+    TicketModule
   ],
   controllers: [AppController],
   providers: [JwtService, AppService, CacheManager, {
